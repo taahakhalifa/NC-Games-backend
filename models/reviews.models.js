@@ -1,5 +1,7 @@
 const db = require("../db/connection");
 const reviews = require("../db/data/test-data/reviews");
+const formatComments = require("../db/seeds/utils");
+const format = require("pg-format");
 
 function fetchAllReviews() {
     const sqlString = `
@@ -48,4 +50,24 @@ function fetchComments(id) {
         return Promise.reject();
     }
 }
-module.exports = { fetchAllReviews, fetchReviewObject, fetchComments };
+
+function insertComment({ author, body }, id) {
+    const sqlString = `
+INSERT INTO comments
+(author, body, review_id)
+VALUES ($1, $2, $3)
+RETURNING author AS username, body;
+`;
+    const commentValues = [author, body, id];
+
+    return db.query(sqlString, commentValues).then(({ rows: [comment] }) => {
+        return comment;
+    });
+}
+
+module.exports = {
+    fetchAllReviews,
+    fetchReviewObject,
+    fetchComments,
+    insertComment,
+};

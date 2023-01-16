@@ -2,6 +2,7 @@ const {
     fetchAllReviews,
     fetchReviewObject,
     fetchComments,
+    insertComment,
 } = require("../models/reviews.models");
 
 function getReviews(req, res, next) {
@@ -33,9 +34,21 @@ function getComments(req, res, next) {
             res.status(200).send({ comments });
         })
         .catch((err) => {
-            console.log(err);
             next(err);
         });
 }
 
-module.exports = { getReviews, getReviewObject, getComments };
+function postComment(req, res, next) {
+    const newComment = req.body;
+    const { review_id } = req.params;
+
+    insertComment(newComment, review_id)
+        .then((comment) => {
+            res.status(201).send({ comment });
+        })
+        .catch((err) => {
+            next(err);
+        });
+}
+
+module.exports = { getReviews, getReviewObject, getComments, postComment };
