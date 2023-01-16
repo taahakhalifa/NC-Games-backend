@@ -1,6 +1,7 @@
 const {
     fetchAllReviews,
     fetchReviewObject,
+    fetchComments,
 } = require("../models/reviews.models");
 
 function getReviews(req, res, next) {
@@ -20,9 +21,21 @@ function getReviewObject(req, res, next) {
             res.status(200).send({ review });
         })
         .catch((err) => {
+            next(err);
+        });
+}
+
+function getComments(req, res, next) {
+    const { review_id } = req.params;
+
+    fetchComments(review_id)
+        .then((comments) => {
+            res.status(200).send({ comments });
+        })
+        .catch((err) => {
             console.log(err);
             next(err);
         });
 }
 
-module.exports = { getReviews, getReviewObject };
+module.exports = { getReviews, getReviewObject, getComments };
