@@ -29,7 +29,7 @@ npm install
 5. Create the following 2 files in the repository, and call them the following:
 
 ```
-'.end.development'
+'.env.development'
 '.env.test'
 ```
 
