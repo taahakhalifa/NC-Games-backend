@@ -18,10 +18,10 @@ describe("/api/categories", () => {
         return request(app)
             .get("/api/categories")
             .expect(200)
-            .then(({ body }) => {
-                expect(body.categories).toBeInstanceOf(Array);
+            .then(({ body: { categories } }) => {
+                expect(categories).toBeInstanceOf(Array);
 
-                body.categories.forEach((category) => {
+                categories.forEach((category) => {
                     expect(category).toHaveProperty("slug");
                     expect(category).toHaveProperty("description");
                 });
@@ -34,10 +34,10 @@ describe("/api/reviews", () => {
         return request(app)
             .get("/api/reviews")
             .expect(200)
-            .then(({ body }) => {
-                expect(body.reviews).toBeInstanceOf(Array);
-                expect(body.reviews.length).toBe(13);
-                body.reviews.forEach((review) => {
+            .then(({ body: { reviews } }) => {
+                expect(reviews).toBeInstanceOf(Array);
+                expect(reviews.length).toBe(13);
+                reviews.forEach((review) => {
                     expect(review).toHaveProperty("owner");
                     expect(review).toHaveProperty("title");
                     expect(review).toHaveProperty("review_id");
@@ -54,8 +54,8 @@ describe("/api/reviews", () => {
         return request(app)
             .get("/api/reviews")
             .expect(200)
-            .then(({ body }) => {
-                expect(body.reviews).toBeSortedBy("created_at");
+            .then(({ body: { reviews } }) => {
+                expect(reviews).toBeSortedBy("created_at");
             });
     });
 });
@@ -65,8 +65,8 @@ describe("/api/reviews/:review_id", () => {
         return request(app)
             .get("/api/reviews/1")
             .expect(200)
-            .then(({ body }) => {
-                expect(body.review).toEqual({
+            .then(({ body: { review } }) => {
+                expect(review).toEqual({
                     review_id: 1,
                     title: "Agricola",
                     designer: "Uwe Rosenberg",
@@ -103,10 +103,10 @@ describe("/api/reviews/:review_id/comments", () => {
         return request(app)
             .get("/api/reviews/2/comments")
             .expect(200)
-            .then(({ body }) => {
-                expect(body.comments).toBeInstanceOf(Array);
-                expect(body.comments.length).toBe(3);
-                body.comments.forEach((comment) => {
+            .then(({ body: { comments } }) => {
+                expect(comments).toBeInstanceOf(Array);
+                expect(comments.length).toBe(3);
+                comments.forEach((comment) => {
                     expect(comment).toHaveProperty("comment_id");
                     expect(comment).toHaveProperty("votes");
                     expect(comment).toHaveProperty("created_at");
@@ -146,8 +146,8 @@ describe("/api/reviews/:review_id/comments", () => {
                 review_id: 3,
                 created_at: new Date(1610964588110),
             })
-            .expect(({ body }) => {
-                expect(body.comment).toEqual({
+            .expect(({ body: { comment } }) => {
+                expect(comment).toEqual({
                     username: "philippaclaire9",
                     body: "10 reasons why cats are better than dogs",
                 });
@@ -208,6 +208,23 @@ describe("/api/reviews/:review_id", () => {
             .send({ inc_votes: 46 })
             .then(({ body }) => {
                 expect(body.msg).toBe("Not Found");
+            });
+    });
+});
+
+describe("/api/users", () => {
+    test("GET: 200 - should resopnd with an array of objects with the required keys", () => {
+        return request(app)
+            .get("/api/users")
+            .expect(200)
+            .then(({ body: { users } }) => {
+                expect(users).toBeInstanceOf(Array);
+                expect(users.length).toBe(4);
+                users.forEach((user) => {
+                    expect(user).toHaveProperty("username");
+                    expect(user).toHaveProperty("name");
+                    expect(user).toHaveProperty("avatar_url");
+                });
             });
     });
 });
