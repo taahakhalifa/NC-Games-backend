@@ -65,9 +65,28 @@ RETURNING author AS username, body;
     });
 }
 
+function updateReview(id, { inc_votes }) {
+    const incrementValue = inc_votes;
+    const initialVotes = Number((reviews.review_id = id));
+    const incrementedVote = initialVotes + incrementValue;
+
+    const sqlString = `
+    UPDATE reviews
+    SET votes = $1
+    WHERE review_id = $2
+    RETURNING *
+    `;
+
+    const sqlStringValues = [incrementedVote, id];
+    return db.query(sqlString, sqlStringValues).then(({ rows: review }) => {
+        return review;
+    });
+}
+
 module.exports = {
     fetchAllReviews,
     fetchReviewObject,
     fetchComments,
     insertComment,
+    updateReview,
 };

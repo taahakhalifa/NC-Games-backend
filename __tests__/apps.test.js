@@ -170,3 +170,44 @@ describe("/api/reviews/:review_id/comments", () => {
             });
     });
 });
+
+describe("/api/reviews/:review_id", () => {
+    test("PATCH: 200 - respond with an updated review where request body accepts an object in the form { inc_votes: newVote }, where newVote is a positive number, and increments the reviews vote property", () => {
+        return request(app)
+            .patch("/api/reviews/1")
+            .expect(200)
+            .send({ inc_votes: 46 })
+            .then(({ body: [review] }) => {
+                expect(review).toEqual({
+                    review_id: 1,
+                    title: "Agricola",
+                    designer: "Uwe Rosenberg",
+                    owner: "mallionaire",
+                    review_img_url:
+                        "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+                    review_body: "Farmyard fun!",
+                    category: "euro game",
+                    created_at: "2021-01-18T10:00:20.514Z",
+                    votes: 47,
+                });
+            });
+    });
+    test("PATCH: 400 - should respond with msg Bad Request when endpoint is not a number", () => {
+        return request(app)
+            .patch("/api/reviews/cheese")
+            .expect(400)
+            .send({ inc_votes: 46 })
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("PATCH: 404 - should respond with msg Not Found when endpoint is a number but is not found", () => {
+        return request(app)
+            .patch("/api/reviews/99087986875764675")
+            .expect(404)
+            .send({ inc_votes: 46 })
+            .then(({ body }) => {
+                expect(body.msg).toBe("Not Found");
+            });
+    });
+});
