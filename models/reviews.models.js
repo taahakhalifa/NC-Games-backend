@@ -3,20 +3,39 @@ const reviews = require("../db/data/test-data/reviews");
 const formatComments = require("../db/seeds/utils");
 const format = require("pg-format");
 
-function fetchAllReviews() {
-    const sqlString = `
-  SELECT reviews.owner, reviews.title, reviews.review_id, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, reviews.designer, count(comments.review_id) AS comment_count
-  FROM reviews
-  LEFT JOIN comments
-  ON reviews.review_id = comments.review_id
-  GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
-  ORDER BY reviews.created_at ASC;
-  `;
+function fetchAllReviews(category, sort = "created_at", order = "desc") {
+    const validSortArg = [
+        "owner",
+        "title",
+        "review_id",
+        "category",
+        "review_img_url",
+        "created_at",
+        "votes",
+        "designer",
+        "comment_count",
+    ];
+    const validOrderArg = ["asc", "desc"];
+    const pushedQuery = [];
+    let sqlString = `
+SELECT reviews.owner, reviews.title, reviews.review_id, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, reviews.designer, count(comments.review_id) AS comment_count
+FROM reviews
+LEFT JOIN comments
+ON reviews.review_id = comments.review_id
+`;
+    if (validSortArg.includes(sort) && validOrderArg.includes(order)) {
+        if (category) {
+            sqlString += `\n WHERE reviews.category = $1 \n GROUP BY reviews.review_id
+        `;
+            pushedQuery.push(category);
+        } else {
+            sqlString += `\n GROUP BY reviews.review_id \n ORDER BY reviews.${sort} ${order}`;
+        }
 
-    return db.query(sqlString).then(({ rows: reviews }) => {
-        delete reviews.review_body;
-        return reviews;
-    });
+        return db.query(sqlString, pushedQuery).then(({ rows: reviews }) => {
+            return reviews;
+        });
+    }
 }
 
 function fetchReviewObject(id) {
@@ -26,13 +45,9 @@ function fetchReviewObject(id) {
   WHERE reviews.review_id = $1;
   `;
 
-    if (id) {
-        return db.query(sqlString, [id]).then(({ rows: [review] }) => {
-            return review;
-        });
-    } else {
-        return Promise.reject();
-    }
+    return db.query(sqlString, [id]).then(({ rows: [review] }) => {
+        return review;
+    });
 }
 
 function fetchComments(id) {
@@ -42,13 +57,9 @@ function fetchComments(id) {
   WHERE comments.review_id = $1
   `;
 
-    if (id) {
-        return db.query(sqlString, [id]).then(({ rows: comments }) => {
-            return comments;
-        });
-    } else {
-        return Promise.reject();
-    }
+    return db.query(sqlString, [id]).then(({ rows: comments }) => {
+        return comments;
+    });
 }
 
 function insertComment({ author, body }, id) {
