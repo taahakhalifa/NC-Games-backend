@@ -93,7 +93,42 @@ describe("/api/reviews/:review_id", () => {
             .get("/api/reviews/12345678902843732964287642")
             .expect(404)
             .then(({ body }) => {
-                console.log(body);
+                expect(body.msg).toBe("Not Found");
+            });
+    });
+});
+
+describe("/api/reviews/:review_id/comments", () => {
+    test("GET: 200 - should respond with an array of comment objects for the given review_id", () => {
+        return request(app)
+            .get("/api/reviews/2/comments")
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.comments).toBeInstanceOf(Array);
+                expect(body.comments.length).toBe(3);
+                body.comments.forEach((comment) => {
+                    expect(comment).toHaveProperty("comment_id");
+                    expect(comment).toHaveProperty("votes");
+                    expect(comment).toHaveProperty("created_at");
+                    expect(comment).toHaveProperty("author");
+                    expect(comment).toHaveProperty("body");
+                    expect(comment).toHaveProperty("review_id");
+                });
+            });
+    });
+    test("GET: 400 - should respond with msg Bad Request when endpoint is not a number", () => {
+        return request(app)
+            .get("/api/reviews/cheese/comments")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("GET: 404 - should respond with msg Not Found when endpoint is a number but is not found", () => {
+        return request(app)
+            .get("/api/reviews/12345678902843732964287642/comments")
+            .expect(404)
+            .then(({ body }) => {
                 expect(body.msg).toBe("Not Found");
             });
     });

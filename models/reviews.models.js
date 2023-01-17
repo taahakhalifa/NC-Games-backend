@@ -33,4 +33,19 @@ function fetchReviewObject(id) {
     }
 }
 
-module.exports = { fetchAllReviews, fetchReviewObject };
+function fetchComments(id) {
+    const sqlString = `
+  SELECT *
+  FROM comments
+  WHERE comments.review_id = $1
+  `;
+
+    if (id) {
+        return db.query(sqlString, [id]).then(({ rows: comments }) => {
+            return comments;
+        });
+    } else {
+        return Promise.reject();
+    }
+}
+module.exports = { fetchAllReviews, fetchReviewObject, fetchComments };
