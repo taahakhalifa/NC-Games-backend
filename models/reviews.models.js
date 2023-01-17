@@ -1,7 +1,6 @@
 const db = require("../db/connection");
 const reviews = require("../db/data/test-data/reviews");
-const formatComments = require("../db/seeds/utils");
-const format = require("pg-format");
+const { fetchAllCategories } = require("./categories.models");
 
 function fetchAllReviews(category, sort = "created_at", order = "desc") {
     const validSortArg = [
@@ -23,26 +22,42 @@ FROM reviews
 LEFT JOIN comments
 ON reviews.review_id = comments.review_id
 `;
-    if (validSortArg.includes(sort) && validOrderArg.includes(order)) {
-        if (category) {
-            sqlString += `\n WHERE reviews.category = $1 \n GROUP BY reviews.review_id
-        `;
-            pushedQuery.push(category);
-        } else {
-            sqlString += `\n GROUP BY reviews.review_id \n ORDER BY reviews.${sort} ${order}`;
-        }
 
-        return db.query(sqlString, pushedQuery).then(({ rows: reviews }) => {
+    if (!validSortArg.includes(sort) || !validOrderArg.includes(order)) {
+        return Promise.reject({ status: 400, msg: "Bad Request" });
+    } else if (category) {
+        sqlString += `\n WHERE reviews.category = $1 \n GROUP BY reviews.review_id
+        `;
+        pushedQuery.push(category);
+    } else {
+        sqlString += `\n GROUP BY reviews.review_id \n ORDER BY reviews.${sort} ${order}`;
+    }
+    const checkMatch = fetchAllCategories()
+        .then((categoriesArray) => {
+            return categoriesArray.some(({ slug }) => slug === category);
+        })
+        .then((result) => {
+            if (result === false && typeof category === "string") {
+                return Promise.reject({ status: 404, msg: "Not Found" });
+            }
+        });
+
+    const dbQuery = db
+        .query(sqlString, pushedQuery)
+        .then(({ rows: reviews }) => {
             return reviews;
         });
-    }
+
+    return Promise.all([checkMatch, dbQuery]).then(([checkMatch, dbQuery]) => {
+        return dbQuery;
+    });
 }
 
 function fetchReviewObject(id) {
     const sqlString = `
-  SELECT *
-  FROM reviews
-  WHERE reviews.review_id = $1;
+    SELECT *
+    FROM reviews
+    WHERE reviews.review_id = $1;
   `;
 
     return db.query(sqlString, [id]).then(({ rows: [review] }) => {
@@ -52,10 +67,10 @@ function fetchReviewObject(id) {
 
 function fetchComments(id) {
     const sqlString = `
-  SELECT *
-  FROM comments
-  WHERE comments.review_id = $1
-  `;
+    SELECT *
+    FROM comments
+    WHERE comments.review_id = $1
+    `;
 
     return db.query(sqlString, [id]).then(({ rows: comments }) => {
         return comments;
@@ -64,11 +79,11 @@ function fetchComments(id) {
 
 function insertComment({ author, body }, id) {
     const sqlString = `
-INSERT INTO comments
-(author, body, review_id)
-VALUES ($1, $2, $3)
-RETURNING author AS username, body;
-`;
+  INSERT INTO comments
+  (author, body, review_id)
+  VALUES ($1, $2, $3)
+  RETURNING author AS username, body;
+  `;
     const commentValues = [author, body, id];
 
     return db.query(sqlString, commentValues).then(({ rows: [comment] }) => {
