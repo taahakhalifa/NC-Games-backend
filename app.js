@@ -27,10 +27,12 @@ app.use(psqlErrors);
 //CUSTOM ERROR
 app.use(customErrors);
 
+//INTERNAL SEVER ERROR 500
+app.use(internalServerError);
+
+//PATH NOT FOUND ERROR
 app.use((req, res) => {
     res.status(404).send({ msg: "Not Found" });
 });
-//INTERNAL SEVER ERROR 500
-app.use(internalServerError);
 
 module.exports = app;
