@@ -343,3 +343,24 @@ describe("TEST", () => {
             });
     });
 });
+describe("/api/comments/:comment_id", () => {
+    test("DELETE: 204 - should delete specified comment from the database", () => {
+        return request(app).delete("/api/comments/1").expect(204);
+    });
+    test("DELETE: 404: comment id valid but does not exist", () => {
+        return request(app)
+            .delete("/api/comments/40465")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toEqual("Not Found");
+            });
+    });
+    test("DELETE: 400: comment id format incorrect", () => {
+        return request(app)
+            .delete("/api/comments/banana")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toEqual("Bad Request");
+            });
+    });
+});
