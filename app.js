@@ -12,6 +12,8 @@ const { getUsers } = require("./controllers/users.controllers");
 const { psqlErrors, customErrors, internalServerError } = require("./errors");
 const { deleteComment } = require("./controllers/comments.controllers");
 
+const { apiRouter } = require("./controllers/apps.controllers");
+
 app.use(express.json());
 
 app.get("/api/categories", getCategories);
@@ -22,6 +24,7 @@ app.post("/api/reviews/:review_id/comments", postComment);
 app.patch("/api/reviews/:review_id", patchReview);
 app.get("/api/users", getUsers);
 app.delete("/api/comments/:comment_id", deleteComment);
+app.get("/api", apiRouter);
 
 //POSTGRES ERROR
 app.use(psqlErrors);

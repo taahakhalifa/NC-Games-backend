@@ -79,15 +79,21 @@ describe("/api/reviews/:review_id", () => {
             .get("/api/reviews/1")
             .expect(200)
             .then(({ body: { review } }) => {
-                expect(review).toHaveProperty("owner");
-                expect(review).toHaveProperty("title");
-                expect(review).toHaveProperty("review_id");
-                expect(review).toHaveProperty("category");
-                expect(review).toHaveProperty("review_img_url");
-                expect(review).toHaveProperty("created_at");
-                expect(review).toHaveProperty("votes");
-                expect(review).toHaveProperty("designer");
-                expect(review).toHaveProperty("comment_count");
+                expect(review).toHaveProperty("owner", expect.any(String));
+                expect(review).toHaveProperty("title", expect.any(String));
+                expect(review).toHaveProperty("review_id", expect.any(Number));
+                expect(review).toHaveProperty("category", expect.any(String));
+                expect(review).toHaveProperty(
+                    "review_img_url",
+                    expect.any(String)
+                );
+                expect(review).toHaveProperty("created_at", expect.any(String));
+                expect(review).toHaveProperty("votes", expect.any(Number));
+                expect(review).toHaveProperty("designer", expect.any(String));
+                expect(review).toHaveProperty(
+                    "comment_count",
+                    expect.any(String)
+                );
 
                 expect(review).toEqual({
                     comment_count: "0",
@@ -245,6 +251,15 @@ describe("/api/reviews/:review_id", () => {
                 expect(body.msg).toBe("Bad Request");
             });
     });
+    test("PATCH: 40 - should respond with msg Not Found when object passed has the wrong key", () => {
+        return request(app)
+            .patch("/api/reviews/1")
+            .expect(400)
+            .send({ inc_veto: 46 })
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
     test("PATCH: 404 - should respond with msg Not Found when endpoint is a number but is not found", () => {
         return request(app)
             .patch("/api/reviews/99087986875764675")
@@ -281,6 +296,7 @@ describe("/api/reviews", () => {
             .get(`/api/reviews?${query1}=${query2}`)
             .expect(200)
             .then(({ body: { reviews } }) => {
+                expect(reviews.length).toBe(1);
                 reviews.forEach((review) => {
                     expect(review.category).toBe("dexterity");
                 });
@@ -310,7 +326,7 @@ describe("/api/reviews", () => {
     });
     test("GET: 200 - should handle a order query, which defaults to descending", () => {
         return request(app)
-            .get(`/api/reviews?sort_by=votes`)
+            .get(`/api/reviews?sort_by=votes&order=desc`)
             .expect(200)
             .then(({ body: { reviews } }) => {
                 expect(reviews).toBeSortedBy("votes", {
@@ -381,6 +397,16 @@ describe("/api/comments/:comment_id", () => {
             .expect(400)
             .then(({ body }) => {
                 expect(body.msg).toEqual("Bad Request");
+            });
+    });
+});
+describe(" GET: /api", () => {
+    test("200: should receive JSON describing all the available endpoints on the API", () => {
+        return request(app)
+            .get("/api")
+            .expect(200)
+            .then(({ body: { endpoints } }) => {
+                expect(endpoints.hasOwnProperty("GET /api")).toBe(true);
             });
     });
 });
