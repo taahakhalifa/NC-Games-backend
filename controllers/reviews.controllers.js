@@ -44,7 +44,6 @@ function getComments(req, res, next) {
 function postComment(req, res, next) {
     const newComment = req.body;
     const { review_id } = req.params;
-
     insertComment(newComment, review_id)
         .then((comment) => {
             res.status(201).send({ comment });
