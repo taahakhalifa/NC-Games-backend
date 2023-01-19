@@ -87,14 +87,14 @@ function fetchComments(id) {
     });
 }
 
-function insertComment({ author, body }, id) {
+function insertComment({ username, body }, id) {
     const sqlString = `
   INSERT INTO comments
   (author, body, review_id)
   VALUES ($1, $2, $3)
   RETURNING author AS username, body;
   `;
-    const commentValues = [author, body, id];
+    const commentValues = [username, body, id];
 
     return db.query(sqlString, commentValues).then(({ rows: [comment] }) => {
         return comment;
