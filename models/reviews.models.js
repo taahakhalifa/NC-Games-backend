@@ -55,13 +55,23 @@ ON reviews.review_id = comments.review_id
 
 function fetchReviewObject(id) {
     const sqlString = `
-    SELECT *
+    SELECT reviews.*, COUNT(comments.review_id) AS comment_count
     FROM reviews
-    WHERE reviews.review_id = $1;
+    LEFT JOIN comments
+    ON reviews.review_id = comments.review_id
+    WHERE reviews.review_id = $1
+    GROUP BY reviews.review_id
   `;
 
     return db.query(sqlString, [id]).then(({ rows: [review] }) => {
-        return review;
+        if (Object.keys(review).length === 0) {
+            return Promise.reject({
+                status: 404,
+                msg: `Not Found:`,
+            });
+        } else {
+            return review;
+        }
     });
 }
 

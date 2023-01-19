@@ -79,7 +79,18 @@ describe("/api/reviews/:review_id", () => {
             .get("/api/reviews/1")
             .expect(200)
             .then(({ body: { review } }) => {
+                expect(review).toHaveProperty("owner");
+                expect(review).toHaveProperty("title");
+                expect(review).toHaveProperty("review_id");
+                expect(review).toHaveProperty("category");
+                expect(review).toHaveProperty("review_img_url");
+                expect(review).toHaveProperty("created_at");
+                expect(review).toHaveProperty("votes");
+                expect(review).toHaveProperty("designer");
+                expect(review).toHaveProperty("comment_count");
+
                 expect(review).toEqual({
+                    comment_count: "0",
                     review_id: 1,
                     title: "Agricola",
                     designer: "Uwe Rosenberg",
