@@ -13,6 +13,17 @@ afterAll(() => {
     return db.end();
 });
 
+describe("/chicken", () => {
+    test("GET: 404 - Path does not exist", () => {
+        return request(app)
+            .get("/chicken")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Not Found");
+            });
+    });
+});
+
 describe("/api/categories", () => {
     test("GET: 200 - should respond with an array of category objects with the required keys", () => {
         return request(app)
@@ -55,7 +66,9 @@ describe("/api/reviews", () => {
             .get("/api/reviews")
             .expect(200)
             .then(({ body: { reviews } }) => {
-                expect(reviews).toBeSortedBy("created_at");
+                expect(reviews).toBeSortedBy("created_at", {
+                    descending: true,
+                });
             });
     });
 });
@@ -225,6 +238,97 @@ describe("/api/users", () => {
                     expect(user).toHaveProperty("name");
                     expect(user).toHaveProperty("avatar_url");
                 });
+            });
+    });
+});
+
+describe("/api/reviews", () => {
+    test("GET: 200 - should handle a category query, which selects the reviews by the category value specified in the query.", () => {
+        const query1 = "category";
+        const query2 = "dexterity";
+        return request(app)
+            .get(`/api/reviews?${query1}=${query2}`)
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                reviews.forEach((review) => {
+                    expect(review.category).toBe("dexterity");
+                });
+            });
+    });
+
+    test("GET: 200 - should handle a sort_by query, which sorts the articles by date which is the default", () => {
+        return request(app)
+            .get(`/api/reviews`)
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                expect(reviews).toBeSortedBy("created_at", {
+                    descending: true,
+                });
+            });
+    });
+    test("GET: 200 - should handle a sort_by query, which sorts the articles by any valid column", () => {
+        const query = "sort_by";
+        return request(app)
+            .get(`/api/reviews?${query}=votes`)
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                expect(reviews).toBeSortedBy("votes", {
+                    descending: true,
+                });
+            });
+    });
+    test("GET: 200 - should handle a order query, which defaults to descending", () => {
+        return request(app)
+            .get(`/api/reviews?sort_by=votes`)
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                expect(reviews).toBeSortedBy("votes", {
+                    descending: true,
+                });
+            });
+    });
+    test("GET: 200 - should handle a order query, which can be set to `asc` or `desc` for ascending or descending", () => {
+        return request(app)
+            .get(`/api/reviews?sort_by=votes&order=asc`)
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                expect(reviews).toBeSortedBy("votes", {
+                    descending: false,
+                });
+            });
+    });
+});
+describe("TEST", () => {
+    test("GET: 404 - should respond with msg Not Found when category is not found in the database", () => {
+        return request(app)
+            .get(`/api/reviews?category=chicken`)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Not Found");
+            });
+    });
+    test("GET: 200 - should respond with empty array when category exists but does not have any reviews associated to it", () => {
+        return request(app)
+            .get(`/api/reviews?category=children's+games`)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.reviews).toEqual([]);
+            });
+    });
+    test("GET: 400 - should respond with msg Bad Request when sort_by column doesn't exist", () => {
+        return request(app)
+            .get("/api/reviews?sort_by=chicken")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("GET: 400 - should respond with msg Bad Request when order is neither asc nor desc", () => {
+        return request(app)
+            .get(`/api/reviews?sort_by=votes&order=chicken`)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
             });
     });
 });

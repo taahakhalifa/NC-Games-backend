@@ -1,63 +1,89 @@
 const db = require("../db/connection");
 const reviews = require("../db/data/test-data/reviews");
-const formatComments = require("../db/seeds/utils");
-const format = require("pg-format");
+const { fetchAllCategories } = require("./categories.models");
 
-function fetchAllReviews() {
-    const sqlString = `
-  SELECT reviews.owner, reviews.title, reviews.review_id, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, reviews.designer, count(comments.review_id) AS comment_count
-  FROM reviews
-  LEFT JOIN comments
-  ON reviews.review_id = comments.review_id
-  GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
-  ORDER BY reviews.created_at ASC;
-  `;
+function fetchAllReviews(category, sort = "created_at", order = "desc") {
+    const validSortArg = [
+        "owner",
+        "title",
+        "review_id",
+        "category",
+        "review_img_url",
+        "created_at",
+        "votes",
+        "designer",
+        "comment_count",
+    ];
+    const validOrderArg = ["asc", "desc"];
+    const pushedQuery = [];
+    let sqlString = `
+SELECT reviews.owner, reviews.title, reviews.review_id, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, reviews.designer, count(comments.review_id) AS comment_count
+FROM reviews
+LEFT JOIN comments
+ON reviews.review_id = comments.review_id
+`;
 
-    return db.query(sqlString).then(({ rows: reviews }) => {
-        delete reviews.review_body;
-        return reviews;
+    if (!validSortArg.includes(sort) || !validOrderArg.includes(order)) {
+        return Promise.reject({ status: 400, msg: "Bad Request" });
+    } else if (category) {
+        sqlString += `\n WHERE reviews.category = $1 \n GROUP BY reviews.review_id
+        `;
+        pushedQuery.push(category);
+    } else {
+        sqlString += `\n GROUP BY reviews.review_id \n ORDER BY reviews.${sort} ${order}`;
+    }
+    const checkMatch = fetchAllCategories()
+        .then((categoriesArray) => {
+            return categoriesArray.some(({ slug }) => slug === category);
+        })
+        .then((result) => {
+            if (result === false && typeof category === "string") {
+                return Promise.reject({ status: 404, msg: "Not Found" });
+            }
+        });
+
+    const dbQuery = db
+        .query(sqlString, pushedQuery)
+        .then(({ rows: reviews }) => {
+            return reviews;
+        });
+
+    return Promise.all([checkMatch, dbQuery]).then(([checkMatch, dbQuery]) => {
+        return dbQuery;
     });
 }
 
 function fetchReviewObject(id) {
     const sqlString = `
-  SELECT *
-  FROM reviews
-  WHERE reviews.review_id = $1;
+    SELECT *
+    FROM reviews
+    WHERE reviews.review_id = $1;
   `;
 
-    if (id) {
-        return db.query(sqlString, [id]).then(({ rows: [review] }) => {
-            return review;
-        });
-    } else {
-        return Promise.reject();
-    }
+    return db.query(sqlString, [id]).then(({ rows: [review] }) => {
+        return review;
+    });
 }
 
 function fetchComments(id) {
     const sqlString = `
-  SELECT *
-  FROM comments
-  WHERE comments.review_id = $1
-  `;
+    SELECT *
+    FROM comments
+    WHERE comments.review_id = $1
+    `;
 
-    if (id) {
-        return db.query(sqlString, [id]).then(({ rows: comments }) => {
-            return comments;
-        });
-    } else {
-        return Promise.reject();
-    }
+    return db.query(sqlString, [id]).then(({ rows: comments }) => {
+        return comments;
+    });
 }
 
 function insertComment({ author, body }, id) {
     const sqlString = `
-INSERT INTO comments
-(author, body, review_id)
-VALUES ($1, $2, $3)
-RETURNING author AS username, body;
-`;
+  INSERT INTO comments
+  (author, body, review_id)
+  VALUES ($1, $2, $3)
+  RETURNING author AS username, body;
+  `;
     const commentValues = [author, body, id];
 
     return db.query(sqlString, commentValues).then(({ rows: [comment] }) => {
