@@ -1,34 +1,132 @@
 {
-  "GET /api": {
-    "description": "serves up a json representation of all the available endpoints of the api"
-  },
-  "GET /api/categories": {
-    "description": "serves an array of all categories",
-    "queries": [],
-    "exampleResponse": {
-      "categories": [
-        {
-          "description": "Players attempt to uncover each other's hidden role",
-          "slug": "Social deduction"
+    "GET /api": {
+        "description": "serves up a json representation of all the available endpoints of the api"
+    },
+    "GET /api/categories": {
+        "description": "serves an array of all categories",
+        "queries": [],
+        "exampleResponse": {
+            "categories": [
+                {
+                    "description": "Players attempt to uncover each other's hidden role",
+                    "slug": "Social deduction"
+                }
+            ]
         }
-      ]
-    }
-  },
-  "GET /api/reviews": {
-    "description": "serves an array of all reviews",
-    "queries": ["category", "sort_by", "order"],
-    "exampleResponse": {
-      "reviews": [
-        {
-          "title": "One Night Ultimate Werewolf",
-          "designer": "Akihisa Okui",
-          "owner": "happyamy2016",
-          "review_img_url": "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-          "category": "hidden-roles",
-          "created_at": 1610964101251,
-          "votes": 5
+    },
+    "GET /api/reviews": {
+        "description": "serves an array of all reviews",
+        "queries": ["category", "sort_by", "order"],
+        "exampleResponse": {
+            "reviews": [
+                {
+                    "title": "One Night Ultimate Werewolf",
+                    "designer": "Akihisa Okui",
+                    "owner": "happyamy2016",
+                    "review_img_url": "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+                    "category": "hidden-roles",
+                    "created_at": 1610964101251,
+                    "votes": 5
+                }
+            ]
         }
-      ]
+    },
+    "GET /api/reviews/:review_id": {
+        "description": "serves a single review by review_id",
+        "queries": [],
+        "exampleResponse": {
+            "review": [
+                {
+                    "comment_count": "0",
+                    "review_id": 1,
+                    "title": "Agricola",
+                    "designer": "Uwe Rosenberg",
+                    "owner": "mallionaire",
+                    "review_img_url": "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+                    "review_body": "Farmyard fun!",
+                    "category": "euro game",
+                    "crea'ted_at": "2021-01-18T10:00:20.514Z",
+                    "votes": 1
+                }
+            ]
+        }
+    },
+    "PATCH /api/reviews/:review_id": {
+        "description": "updates the votes of the given review by review_id",
+        "queries": [],
+        "Request Body Guide": {
+            "format": "an object containing the correct body information - { inc_votes: a number to either increment (e.g 2) by or decrement (e.g -2) by }.",
+            "example": { "inc_votes": 46 }
+        },
+        "exampleResponse": {
+            "review": [
+                {
+                    "review_id": 1,
+                    "title": "Agricola",
+                    "designer": "Uwe Rosenberg",
+                    "owner": "mallionaire",
+                    "review_img_url": "https://images.pexels.com/photos/974314/pexels-photo-974314.jpeg?w=700&h=700",
+                    "review_body": "Farmyard fun!",
+                    "category": "euro game",
+                    "created_at": "2021-01-18T10:00:20.514Z",
+                    "votes": 47
+                }
+            ]
+        }
+    },
+    "GET /api/reviews/:review_id/comments": {
+        "description": "serves an array of all the comments by review_id",
+        "queries": [],
+        "exampleResponse": {
+            "comment": [
+                {
+                    "comment_id": 4,
+                    "votes": 16,
+                    "created_at": "2017-11-22T12:36:03.389Z",
+                    "author": "bainesface",
+                    "body": "EPIC board game!",
+                    "review_id": 2
+                }
+            ]
+        }
+    },
+    "POST /api/reviews/:review_id/comments": {
+        "description": "serves up a new object which consists of the posted comment",
+        "queries": [],
+        "Request Body Guide": {
+          "format": "an object containing the correct body information - { username: a valid username in the database in the form of a string, body: a paragraph of the comment in the form of a string}.",
+          "example": { "username": "mallionaire", "body": "This is a new comment." }
+        },
+        "exampleResponse": {
+          "comment_id": 7,
+          "author": "mallionaire",
+          "review_id": 2,
+          "votes": 0,
+          "created_at": "2021-12-02T15:56:21.326Z",
+          "body": "This is a new comment."
+        }
+      },
+    "GET /api/users": {
+        "description": "serves up a an array of user objects",
+        "queries": [],
+        "exampleResponse": {
+            "users": [
+                {
+                    "username": "mallionaire",
+                    "name": "haz",
+                    "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+                },
+                {
+                    "username": "philippaclaire9",
+                    "name": "philippa",
+                    "avatar_url": "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
+                }
+            ]
+        }
+    },
+    "DELETE /api/comments/:comment:id": {
+        "description": "serves up an empty object when user requests a certain comment deleted",
+        "queries": [],
+        "exampleResponse": {}
     }
-  }
 }

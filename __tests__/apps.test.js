@@ -164,11 +164,8 @@ describe("/api/reviews/:review_id/comments", () => {
             .post("/api/reviews/3/comments")
             .expect(201)
             .send({
+                username: "philippaclaire9",
                 body: "10 reasons why cats are better than dogs",
-                votes: 103,
-                author: "philippaclaire9",
-                review_id: 3,
-                created_at: new Date(1610964588110),
             })
             .expect(({ body: { comment } }) => {
                 expect(comment).toEqual({
@@ -191,6 +188,29 @@ describe("/api/reviews/:review_id/comments", () => {
             .expect(404)
             .then(({ body }) => {
                 expect(body.msg).toBe("Not Found");
+            });
+    });
+    test("POST: 404 - should respond with msg Not Found when username doesn't exist", () => {
+        return request(app)
+            .post("/api/reviews/1/comments")
+            .expect(404)
+            .send({
+                username: "roccos",
+                body: "10 reasons why cats are better than dogs",
+            })
+            .expect(({ body }) => {
+                expect(body.msg).toBe("Not Found");
+            });
+    });
+    test("POST: 400 - should respond with msg Bad Request when one of the required keys are missing", () => {
+        return request(app)
+            .post("/api/reviews/1/comments")
+            .expect(400)
+            .send({
+                body: "10 reasons why cats are better than dogs",
+            })
+            .expect(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
             });
     });
 });
@@ -242,6 +262,7 @@ describe("/api/users", () => {
             .get("/api/users")
             .expect(200)
             .then(({ body: { users } }) => {
+                console.log(users);
                 expect(users).toBeInstanceOf(Array);
                 expect(users.length).toBe(4);
                 users.forEach((user) => {
@@ -349,7 +370,7 @@ describe("/api/comments/:comment_id", () => {
     });
     test("DELETE: 404: comment id valid but does not exist", () => {
         return request(app)
-            .delete("/api/comments/40465")
+            .delete("/api/comments/40")
             .expect(404)
             .then(({ body }) => {
                 expect(body.msg).toEqual("Not Found");
