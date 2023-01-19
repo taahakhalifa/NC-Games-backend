@@ -262,7 +262,6 @@ describe("/api/users", () => {
             .get("/api/users")
             .expect(200)
             .then(({ body: { users } }) => {
-                console.log(users);
                 expect(users).toBeInstanceOf(Array);
                 expect(users.length).toBe(4);
                 users.forEach((user) => {
