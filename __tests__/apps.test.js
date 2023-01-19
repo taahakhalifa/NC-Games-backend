@@ -133,3 +133,40 @@ describe("/api/reviews/:review_id/comments", () => {
             });
     });
 });
+
+describe("/api/reviews/:review_id/comments", () => {
+    test("POST: 201 - respond with the posted commenet where the request body accepts an object with all the required keys", () => {
+        return request(app)
+            .post("/api/reviews/3/comments")
+            .expect(201)
+            .send({
+                body: "10 reasons why cats are better than dogs",
+                votes: 103,
+                author: "philippaclaire9",
+                review_id: 3,
+                created_at: new Date(1610964588110),
+            })
+            .expect(({ body }) => {
+                expect(body.comment).toEqual({
+                    username: "philippaclaire9",
+                    body: "10 reasons why cats are better than dogs",
+                });
+            });
+    });
+    test("POST: 400 - should respond with msg Bad Request when endpoint is not a number", () => {
+        return request(app)
+            .post("/api/reviews/cheese/comments")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("POST: 404 - should respond with msg Not Found when endpoint is a number but is not found", () => {
+        return request(app)
+            .post("/api/reviews/12345678902843732964287642/comments")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Not Found");
+            });
+    });
+});
