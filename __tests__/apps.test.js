@@ -410,3 +410,38 @@ describe(" GET: /api", () => {
             });
     });
 });
+describe("/api/users/:username", () => {
+    test("GET: 200 - should respond with a user object which has all the required keys", () => {
+        return request(app)
+            .get("/api/users/mallionaire")
+            .expect(200)
+            .then(({ body: { user } }) => {
+                expect(user).toHaveProperty("username", expect.any(String));
+                expect(user).toHaveProperty("avatar_url", expect.any(String));
+                expect(user).toHaveProperty("name", expect.any(String));
+
+                expect(user).toEqual({
+                    username: "mallionaire",
+                    name: "haz",
+                    avatar_url:
+                        "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+                });
+            });
+    });
+    test("GET: 400 - should respond with msg Bad Request when endpoint is not a string", () => {
+        return request(app)
+            .get("/api/users/123")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Not Found");
+            });
+    });
+    test("GET: 404 - should respond with msg Not Found when endpoint is a string but is not found", () => {
+        return request(app)
+            .get("/api/users/cheese")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Not Found");
+            });
+    });
+});
