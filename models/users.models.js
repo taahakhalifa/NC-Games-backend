@@ -11,4 +11,20 @@ function fetchUsers() {
     });
 }
 
-module.exports = { fetchUsers };
+function fetchUser(username) {
+    const sqlString = `
+  SELECT *
+  FROM USERS
+  WHERE username = $1
+  `;
+
+    return db.query(sqlString, [username]).then(({ rows: [user] }) => {
+        if (user === undefined) {
+            return Promise.reject({ status: 404, msg: "Not Found" });
+        } else {
+            return user;
+        }
+    });
+}
+
+module.exports = { fetchUsers, fetchUser };
