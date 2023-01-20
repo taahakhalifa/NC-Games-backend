@@ -6,7 +6,7 @@
 
 The NorthGamers `API` is a database API for game reviews that I created as part of my full-stack software developer bootcamp at Northcoders. The API provides a simple interface for users to access game reviews and comments. This `README` will help you through the installation and implementation of the API locally onto your machine.
 
-Please feel free to investigate all the potential API endpoints as a starting point on the API [here](). Downloading the [JSON Formatter](https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en) extension on Chrome is recommended prior to visiting the link.
+Please feel free to investigate all the potential API endpoints as a starting point on the API [here](https://taahakhalifa-nc-games-api.onrender.com/api). Downloading the [JSON Formatter](https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en) extension on Chrome is recommended prior to visiting the link.
 
 ---
 

@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 
-function endPointJSONData() {
+function endPointsJSONData() {
     return fs
         .readFile(`${__dirname}/../endpoints.json`, "utf-8")
         .then((endpoints) => {
@@ -8,4 +8,4 @@ function endPointJSONData() {
         });
 }
 
-module.exports = { endPointJSONData };
+module.exports = { endPointsJSONData };
