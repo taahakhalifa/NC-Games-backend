@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const comments = require("../db/data/test-data/comments");
 
 function removeComment(id) {
     const sqlString = `
@@ -13,4 +14,22 @@ function removeComment(id) {
     });
 }
 
-module.exports = { removeComment };
+function updateComment(id, { inc_votes }) {
+    incrementalValue = inc_votes;
+
+    const sqlString = `
+  UPDATE comments
+  SET votes = votes + $1
+  WHERE comment_id = $2
+  RETURNING *
+  `;
+
+    return db
+        .query(sqlString, [incrementalValue, id])
+        .then(({ rows: [comment] }) => {
+            delete comment.comment_id;
+            return comment;
+        });
+}
+
+module.exports = { removeComment, updateComment };
