@@ -1,4 +1,4 @@
-const { removeComment } = require("../models/comments.models");
+const { removeComment, updateComment } = require("../models/comments.models");
 
 function deleteComment(req, res, next) {
     const { comment_id } = req.params;
@@ -12,4 +12,17 @@ function deleteComment(req, res, next) {
         });
 }
 
-module.exports = { deleteComment };
+function patchComment(req, res, next) {
+    const { comment_id } = req.params;
+    const incrementalValue = req.body;
+
+    updateComment(comment_id, incrementalValue)
+        .then((comment) => {
+            res.status(200).send({ comment });
+        })
+        .catch((err) => {
+            next(err);
+        });
+}
+
+module.exports = { deleteComment, patchComment };
