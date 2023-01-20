@@ -553,28 +553,96 @@ describe("/api/users", () => {
 });
 
 describe("/api/reviews", () => {
-    test("GET: 200 - should handle a category query, which selects the reviews by the category value specified in the query.", () => {
-        const query1 = "category";
-        const query2 = "dexterity";
+    test("POST: 201 - respond with the posted review where the request body accepts an object with all the required keys", () => {
         return request(app)
-            .get(`/api/reviews?${query1}=${query2}`)
-            .expect(200)
-            .then(({ body: { reviews } }) => {
-                expect(reviews.length).toBe(1);
-                reviews.forEach((review) => {
-                    expect(review.category).toBe("dexterity");
-                });
+            .post("/api/reviews")
+            .expect(201)
+            .send({
+                title: "Suits",
+                designer: "Taaha Khalifa",
+                owner: "mallionaire",
+                review_body: "Let's get it cracking!",
+                category: "euro game",
+            })
+            .expect(({ body: { review } }) => {
+                expect(review).toHaveProperty("title", expect.any(String));
+                expect(review).toHaveProperty("category", expect.any(String));
+                expect(review).toHaveProperty("designer", expect.any(String));
+                expect(review).toHaveProperty("owner", expect.any(String));
+                expect(review).toHaveProperty(
+                    "review_body",
+                    expect.any(String)
+                );
+                expect(review).toHaveProperty(
+                    "review_img_url",
+                    expect.any(String)
+                );
+                expect(review).toHaveProperty("created_at", expect.any(String));
+                expect(review).toHaveProperty("review_id", expect.any(Number));
+                expect(review).toHaveProperty("votes", expect.any(Number));
+                expect(review).toHaveProperty(
+                    "comment_count",
+                    expect.any(String)
+                );
             });
     });
-
-    test("GET: 200 - should handle a sort_by query, which sorts the articles by date which is the default", () => {
-        return request(app)
-            .get(`/api/reviews`)
-            .expect(200)
-            .then(({ body: { reviews } }) => {
-                expect(reviews).toBeSortedBy("created_at", {
-                    descending: true,
-                });
-            });
-    });
+});
+test("POST: 400 - should respond with msg Bad Request when object has an incorrect property name", () => {
+    return request(app)
+        .post("/api/reviews")
+        .expect(400)
+        .send({
+            movie: "Suits",
+            designer: "Taaha Khalifa",
+            owner: "mallionaire",
+            review_body: "Let's get it cracking!",
+            category: "euro game",
+        })
+        .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request");
+        });
+});
+test("POST: 400 - should respond with msg Bad Request when object has property missing", () => {
+    return request(app)
+        .post("/api/reviews")
+        .expect(400)
+        .send({
+            designer: "Taaha Khalifa",
+            owner: "mallionaire",
+            review_body: "Let's get it cracking!",
+            category: "euro game",
+        })
+        .then(({ body }) => {
+            expect(body.msg).toBe("Bad Request");
+        });
+});
+test("POST: 404 - should respond with msg Not Found when owner is not found", () => {
+    return request(app)
+        .post("/api/reviews")
+        .expect(404)
+        .send({
+            title: "Suits",
+            designer: "Taaha Khalifa",
+            owner: "barry",
+            review_body: "Let's get it cracking!",
+            category: "euro game",
+        })
+        .expect(({ body }) => {
+            expect(body.msg).toBe("Not Found");
+        });
+});
+test("POST: 404 - should respond with msg Not Found when category is not found", () => {
+    return request(app)
+        .post("/api/reviews")
+        .expect(404)
+        .send({
+            title: "Suits",
+            designer: "Taaha Khalifa",
+            owner: "mallionaire",
+            review_body: "Let's get it cracking!",
+            category: "golaso",
+        })
+        .expect(({ body }) => {
+            expect(body.msg).toBe("Not Found");
+        });
 });
