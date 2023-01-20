@@ -1,9 +1,11 @@
+const reviews = require("../db/data/test-data/reviews");
 const {
     fetchAllReviews,
     fetchReviewObject,
     fetchComments,
     insertComment,
     updateReview,
+    insertReview,
 } = require("../models/reviews.models");
 
 function getReviews(req, res, next) {
@@ -67,10 +69,23 @@ function patchReview(req, res, next) {
         });
 }
 
+function postReview(req, res, next) {
+    const postedReview = req.body;
+
+    insertReview(postedReview)
+        .then((review) => {
+            res.status(201).send({ review });
+        })
+        .catch((err) => {
+            next(err);
+        });
+}
+
 module.exports = {
     getReviews,
     getReviewObject,
     getComments,
     postComment,
     patchReview,
+    postReview,
 };

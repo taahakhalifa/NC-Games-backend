@@ -117,10 +117,47 @@ function updateReview(id, { inc_votes }) {
     });
 }
 
+function insertReview({ title, designer, owner, review_body, category }) {
+    const sqlStringWithoutCommentCount = `
+  INSERT INTO reviews
+  (title, designer, owner, review_body, category)
+  VALUES ($1, $2, $3, $4, $5)
+  RETURNING *
+  `;
+    const reviewValues = [title, designer, owner, review_body, category];
+
+    const reviewWithoutCommentCount = db.query(
+        sqlStringWithoutCommentCount,
+        reviewValues
+    );
+
+    const sqlStringWithCommentCount = `
+    SELECT reviews.*, count(comments.review_id) AS comment_count
+    FROM reviews
+    LEFT JOIN comments
+    ON reviews.review_id = comments.review_id
+    WHERE title = $1
+    GROUP BY reviews.review_id;
+    `;
+    const reviewWithCommentCount = db.query(sqlStringWithCommentCount, [title]);
+
+    return Promise.all([
+        reviewWithoutCommentCount,
+        reviewWithCommentCount,
+    ]).then(([reviewWithoutCommentCount, reviewWithCommentCount]) => {
+        return reviewWithCommentCount.rows[0];
+    });
+}
+
 module.exports = {
     fetchAllReviews,
     fetchReviewObject,
     fetchComments,
     insertComment,
     updateReview,
+    insertReview,
 };
+
+// .then(({ rows: [review] }) => {
+//   return review;
+// });
