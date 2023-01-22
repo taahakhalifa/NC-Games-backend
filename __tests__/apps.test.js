@@ -684,8 +684,7 @@ describe("/api/reviews", () => {
     //         .get("/api/reviews?limit=5&p=2")
     //         .expect(200)
     //         .then(({ body: { reviews } }) => {
-    //             console.log(reviews);
-    //             expect(reviews.total_count).toEqual(13);
+    //             expect(reviews.total_count).toEqual();
     //         });
     // });
     test("GET: 400 - respond with msg Bad Request when limit query is invalid", () => {
@@ -811,6 +810,28 @@ describe("/api/reviews", () => {
             })
             .then(({ body }) => {
                 expect(body.msg).toBe("Bad Request");
+            });
+    });
+});
+
+describe("/api/reviews/:review_id", () => {
+    test("DELETE: 204 - should delete specified review from the database", () => {
+        return request(app).delete("/api/reviews/1").expect(204);
+    });
+    test("DELETE: 404: review id valid but does not exist", () => {
+        return request(app)
+            .delete("/api/reviews/999")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toEqual("Not Found");
+            });
+    });
+    test("DELETE: 400: review id is not a number", () => {
+        return request(app)
+            .delete("/api/reviews/banana")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toEqual("Bad Request");
             });
     });
 });

@@ -194,6 +194,19 @@ function insertReview({ title, designer, owner, review_body, category }) {
     });
 }
 
+function removeReview(id) {
+    const sqlString = `
+  DELETE FROM reviews
+  WHERE review_id = $1
+  `;
+
+    return db.query(sqlString, [id]).then(({ rowCount }) => {
+        if (rowCount === 0) {
+            return Promise.reject({ status: 404, msg: "Not Found" });
+        }
+    });
+}
+
 module.exports = {
     fetchAllReviews,
     fetchReviewObject,
@@ -201,8 +214,5 @@ module.exports = {
     insertComment,
     updateReview,
     insertReview,
+    removeReview,
 };
-
-// .then(({ rows: [review] }) => {
-//   return review;
-// });
