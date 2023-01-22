@@ -9,9 +9,9 @@ const {
 } = require("../models/reviews.models");
 
 function getReviews(req, res, next) {
-    const { category, sort_by, order } = req.query;
+    const { category, sort_by, order, limit, p } = req.query;
 
-    fetchAllReviews(category, sort_by, order)
+    fetchAllReviews(category, sort_by, order, limit, p)
         .then((reviews) => {
             Number(reviews.comment_count);
             res.status(200).send({ reviews });
