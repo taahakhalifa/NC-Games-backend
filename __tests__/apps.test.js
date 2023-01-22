@@ -728,7 +728,6 @@ describe("/api/reviews/:review_id/comments", () => {
             .get("/api/reviews/2/comments?p=1")
             .expect(200)
             .then(({ body: { comments } }) => {
-                console.log(comments);
                 expect(comments.length).toBe(3);
             });
     });
@@ -770,6 +769,48 @@ describe("/api/reviews/:review_id/comments", () => {
             .expect(404)
             .then(({ body }) => {
                 expect(body.msg).toBe("Not Found");
+            });
+    });
+});
+
+describe("/api/reviews", () => {
+    test("POST: 201 - respond with the posted category where the request body accepts an object with all the required keys", () => {
+        return request(app)
+            .post("/api/categories")
+            .expect(201)
+            .send({
+                slug: "premier league",
+                description: "We Love You Arsenal, WE DO!",
+            })
+            .expect(({ body: { category } }) => {
+                expect(category).toHaveProperty("slug", expect.any(String));
+                expect(category).toHaveProperty(
+                    "description",
+                    expect.any(String)
+                );
+            });
+    });
+    test("POST: 400 - should respond with msg Bad Request when object has an incorrect property name", () => {
+        return request(app)
+            .post("/api/categories")
+            .expect(400)
+            .send({
+                slug: "premier league",
+                premier: "We Love You Arsenal, WE DO!",
+            })
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("POST: 400 - should respond with msg Bad Request when object has property missing", () => {
+        return request(app)
+            .post("/api/categories")
+            .expect(400)
+            .send({
+                slug: "premier league",
+            })
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
             });
     });
 });
