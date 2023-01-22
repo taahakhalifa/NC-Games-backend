@@ -34,8 +34,9 @@ function getReviewObject(req, res, next) {
 
 function getComments(req, res, next) {
     const { review_id } = req.params;
+    const { limit, p } = req.query;
 
-    fetchComments(review_id)
+    fetchComments(review_id, limit, p)
         .then((comments) => {
             res.status(200).send({ comments });
         })

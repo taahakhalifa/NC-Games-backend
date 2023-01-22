@@ -145,7 +145,7 @@ describe("/api/reviews/:review_id/comments", () => {
                 });
             });
     });
-    test("GET: 400 - should respond with msg Bad Request when endpoint is not a number", () => {
+    test("GET: 400 - should respond with msg Bad Request when review_id is not a number", () => {
         return request(app)
             .get("/api/reviews/cheese/comments")
             .expect(400)
@@ -153,7 +153,7 @@ describe("/api/reviews/:review_id/comments", () => {
                 expect(body.msg).toBe("Bad Request");
             });
     });
-    test("GET: 404 - should respond with msg Not Found when endpoint is a number but is not found", () => {
+    test("GET: 404 - should respond with msg Not Found when review_id is a number but is not found", () => {
         return request(app)
             .get("/api/reviews/12345678902843732964287642/comments")
             .expect(404)
@@ -702,6 +702,74 @@ describe("/api/reviews", () => {
             .expect(400)
             .then(({ body }) => {
                 expect(body.msg).toBe("Bad Request");
+            });
+    });
+});
+
+describe("/api/reviews/:review_id/comments", () => {
+    test("GET: 200 - should handle a limit query returning 10 comments as a default", () => {
+        return request(app)
+            .get("/api/reviews/2/comments")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+                expect(comments.length).toBe(3);
+            });
+    });
+    test("GET: 200 - should handle a limit query returning 8 comments when limit is 8", () => {
+        return request(app)
+            .get("/api/reviews/2/comments?limit=8")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+                expect(comments.length).toBe(3);
+            });
+    });
+    test("GET: 200 - should return default limit of 10 with p query", () => {
+        return request(app)
+            .get("/api/reviews/2/comments?p=1")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+                console.log(comments);
+                expect(comments.length).toBe(3);
+            });
+    });
+    test("GET: 200 - should return default limit of 5 with p query", () => {
+        return request(app)
+            .get("/api/reviews/2/comments?limit=5&p=1")
+            .expect(200)
+            .then(({ body: { comments } }) => {
+                expect(comments.length).toBe(3);
+            });
+    });
+    test("GET: 400 - respond with msg Bad Request when limit query is invalid", () => {
+        return request(app)
+            .get("/api/reviews/2/comments?limit=ten&p=1")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("GET: 400 - respond with msg Bad Request when p query is invalid", () => {
+        return request(app)
+            .get("/api/reviews/2/comments?limit=5&p=ten")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("GET: 400 - should respond with msg Bad Request when review_id is not a number", () => {
+        return request(app)
+            .get("/api/reviews/cheese/comments")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("GET: 404 - should respond with msg Not Found when review_id is a number but is not found", () => {
+        return request(app)
+            .get("/api/reviews/12345678902843732964287642/comments")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Not Found");
             });
     });
 });

@@ -101,14 +101,33 @@ function fetchReviewObject(id) {
     });
 }
 
-function fetchComments(id) {
-    const sqlString = `
+function fetchComments(id, limit, p) {
+    let sqlString = `
     SELECT *
     FROM comments
     WHERE comments.review_id = $1
     `;
 
-    return db.query(sqlString, [id]).then(({ rows: comments }) => {
+    const pushedQuery = [id];
+
+    if (limit) {
+        sqlString += `\n LIMIT $2`;
+        pushedQuery.push(limit);
+    } else {
+        sqlString += `\n LIMIT 10`;
+    }
+
+    if (p && limit) {
+        sqlString += `\n OFFSET $3`;
+        const offsetNum = p * limit - limit;
+        pushedQuery.push(offsetNum);
+    } else if (p) {
+        sqlString += `\n OFFSET $2`;
+        const offsetNum = p * 10 - 10;
+        pushedQuery.push(offsetNum);
+    }
+
+    return db.query(sqlString, pushedQuery).then(({ rows: comments }) => {
         return comments;
     });
 }
