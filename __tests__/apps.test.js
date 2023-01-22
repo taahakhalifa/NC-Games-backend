@@ -47,7 +47,6 @@ describe("/api/reviews", () => {
             .expect(200)
             .then(({ body: { reviews } }) => {
                 expect(reviews).toBeInstanceOf(Array);
-                expect(reviews.length).toBe(13);
                 reviews.forEach((review) => {
                     expect(review).toHaveProperty("owner");
                     expect(review).toHaveProperty("title");
@@ -645,4 +644,64 @@ test("POST: 404 - should respond with msg Not Found when category is not found",
         .expect(({ body }) => {
             expect(body.msg).toBe("Not Found");
         });
+});
+
+describe("/api/reviews", () => {
+    test("GET: 200 - should handle a limit query returning 10 reviews as a default", () => {
+        return request(app)
+            .get("/api/reviews")
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                expect(reviews.length).toBe(10);
+            });
+    });
+    test("GET: 200 - should handle a limit query returning 8 reviews when limit is 8", () => {
+        return request(app)
+            .get("/api/reviews?limit=8")
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                expect(reviews.length).toBe(8);
+            });
+    });
+    test("GET: 200 - should return default limit of 10 with p query", () => {
+        return request(app)
+            .get("/api/reviews?p=1")
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                expect(reviews.length).toBe(10);
+            });
+    });
+    test("GET: 200 - should return default limit of 5 with p query", () => {
+        return request(app)
+            .get("/api/reviews?limit=5&p=2")
+            .expect(200)
+            .then(({ body: { reviews } }) => {
+                expect(reviews.length).toBe(5);
+            });
+    });
+    // test("GET: 200 - should return article count", () => {
+    //     return request(app)
+    //         .get("/api/reviews?limit=5&p=2")
+    //         .expect(200)
+    //         .then(({ body: { reviews } }) => {
+    //             console.log(reviews);
+    //             expect(reviews.total_count).toEqual(13);
+    //         });
+    // });
+    test("GET: 400 - respond with msg Bad Request when limit query is invalid", () => {
+        return request(app)
+            .get("/api/reviews?limit=ten&p=1")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("GET: 400 - respond with msg Bad Request when p query is invalid", () => {
+        return request(app)
+            .get("/api/reviews?limit=5&p=ten")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
 });

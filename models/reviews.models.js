@@ -1,8 +1,15 @@
+const { off } = require("../app");
 const db = require("../db/connection");
 const reviews = require("../db/data/test-data/reviews");
 const { fetchAllCategories } = require("./categories.models");
 
-function fetchAllReviews(category, sort = "created_at", order = "desc") {
+function fetchAllReviews(
+    category,
+    sort = "created_at",
+    order = "desc",
+    limit,
+    p
+) {
     const validSortArg = [
         "owner",
         "title",
@@ -25,13 +32,32 @@ ON reviews.review_id = comments.review_id
 
     if (!validSortArg.includes(sort) || !validOrderArg.includes(order)) {
         return Promise.reject({ status: 400, msg: "Bad Request" });
-    } else if (category) {
+    }
+    if (category) {
         sqlString += `\n WHERE reviews.category = $1 \n GROUP BY reviews.review_id
         `;
         pushedQuery.push(category);
     } else {
         sqlString += `\n GROUP BY reviews.review_id \n ORDER BY reviews.${sort} ${order}`;
     }
+
+    if (limit) {
+        sqlString += `\n LIMIT $1`;
+        pushedQuery.push(limit);
+    } else {
+        sqlString += `\n LIMIT 10`;
+    }
+
+    if (p && limit) {
+        sqlString += `\n OFFSET $2`;
+        const offsetNum = p * limit - limit;
+        pushedQuery.push(offsetNum);
+    } else if (p) {
+        sqlString += `\n OFFSET $1`;
+        const offsetNum = p * 10 - 10;
+        pushedQuery.push(offsetNum);
+    }
+
     const checkMatch = fetchAllCategories()
         .then((categoriesArray) => {
             return categoriesArray.some(({ slug }) => slug === category);

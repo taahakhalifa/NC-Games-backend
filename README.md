@@ -22,7 +22,6 @@ Test Driven Development `(TDD)` was used to rigorously test all endpoints and ac
 
 ## Tools Utilised
 
--   `Node.js` : For building fast and scalable network applications.
 -   `PostgreSQL` : Used as the API database's primary data warehouse.
 -   `Express` : A Node.js web application framework which enabled me to specify which function is invoked for a certain HTTP verb and URL pattern.
 -   `Dotenv` : Used to manage my environment variables and to provide additional protection.
@@ -77,16 +76,16 @@ PGDATABASE=nc_games;
 
 Now that both .env files are created, we will need to `run some scripts` to get the code to run.
 
-1. Run this command to `create the databases` on your machine:
+1. `Create the databases` by running the following command:
 
 ```bash
-node run setup-dbs
+npm run setup-dbs
 ```
 
-2. You will now need to `seed the databases` by running this command:
+2. You will now need to `seed the databases` by running the following command:
 
 ```bash
-node run seed
+npm run seed
 ```
 
 3. The final step now is to `check` if everything was set up correctly. To do this, run the following command and watch those green ticks come in!
