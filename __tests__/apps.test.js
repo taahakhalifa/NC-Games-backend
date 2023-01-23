@@ -684,8 +684,7 @@ describe("/api/reviews", () => {
     //         .get("/api/reviews?limit=5&p=2")
     //         .expect(200)
     //         .then(({ body: { reviews } }) => {
-    //             console.log(reviews);
-    //             expect(reviews.total_count).toEqual(13);
+    //             expect(reviews.total_count).toEqual();
     //         });
     // });
     test("GET: 400 - respond with msg Bad Request when limit query is invalid", () => {
@@ -728,7 +727,6 @@ describe("/api/reviews/:review_id/comments", () => {
             .get("/api/reviews/2/comments?p=1")
             .expect(200)
             .then(({ body: { comments } }) => {
-                console.log(comments);
                 expect(comments.length).toBe(3);
             });
     });
@@ -770,6 +768,70 @@ describe("/api/reviews/:review_id/comments", () => {
             .expect(404)
             .then(({ body }) => {
                 expect(body.msg).toBe("Not Found");
+            });
+    });
+});
+
+describe("/api/reviews", () => {
+    test("POST: 201 - respond with the posted category where the request body accepts an object with all the required keys", () => {
+        return request(app)
+            .post("/api/categories")
+            .expect(201)
+            .send({
+                slug: "premier league",
+                description: "We Love You Arsenal, WE DO!",
+            })
+            .expect(({ body: { category } }) => {
+                expect(category).toHaveProperty("slug", expect.any(String));
+                expect(category).toHaveProperty(
+                    "description",
+                    expect.any(String)
+                );
+            });
+    });
+    test("POST: 400 - should respond with msg Bad Request when object has an incorrect property name", () => {
+        return request(app)
+            .post("/api/categories")
+            .expect(400)
+            .send({
+                slug: "premier league",
+                premier: "We Love You Arsenal, WE DO!",
+            })
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+    test("POST: 400 - should respond with msg Bad Request when object has property missing", () => {
+        return request(app)
+            .post("/api/categories")
+            .expect(400)
+            .send({
+                slug: "premier league",
+            })
+            .then(({ body }) => {
+                expect(body.msg).toBe("Bad Request");
+            });
+    });
+});
+
+describe("/api/reviews/:review_id", () => {
+    test("DELETE: 204 - should delete specified review from the database", () => {
+        return request(app).delete("/api/reviews/1").expect(204);
+    });
+    test("DELETE: 404: review id valid but does not exist", () => {
+        return request(app)
+            .delete("/api/reviews/999")
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toEqual("Not Found");
+            });
+    });
+    test("DELETE: 400: review id is not a number", () => {
+        return request(app)
+            .delete("/api/reviews/banana")
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toEqual("Bad Request");
             });
     });
 });

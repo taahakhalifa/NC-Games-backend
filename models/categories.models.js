@@ -10,4 +10,23 @@ function fetchAllCategories() {
     });
 }
 
-module.exports = { fetchAllCategories };
+function insertCategory({ slug, description }) {
+    const sqlString = `
+    INSERT INTO categories
+    (slug, description)
+    VALUES ($1, $2)
+    RETURNING *
+    `;
+
+    return db
+        .query(sqlString, [slug, description])
+        .then(({ rows: [category] }) => {
+            if (category.description === null) {
+                return Promise.reject({ status: 400, msg: "Bad Request" });
+            } else {
+                return category;
+            }
+        });
+}
+
+module.exports = { fetchAllCategories, insertCategory };
