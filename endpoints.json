@@ -16,7 +16,7 @@
     },
     "GET /api/reviews": {
         "description": "serves an array of all reviews",
-        "queries": ["category", "sort_by", "order"],
+        "queries": ["category", "sort_by", "order", "limit", "p"],
         "exampleResponse": {
             "reviews": [
                 {
@@ -76,7 +76,7 @@
     },
     "GET /api/reviews/:review_id/comments": {
         "description": "serves an array of all the comments by review_id",
-        "queries": [],
+        "queries": ["limit", "p"],
         "exampleResponse": {
             "comment": [
                 {
@@ -94,18 +94,21 @@
         "description": "serves up a new object which consists of the posted comment",
         "queries": [],
         "Request Body Guide": {
-          "format": "an object containing the correct body information - { username: a valid username in the database in the form of a string, body: a paragraph of the comment in the form of a string}.",
-          "example": { "username": "mallionaire", "body": "This is a new comment." }
+            "format": "an object containing the correct body information - { username: a valid username in the database in the form of a string, body: a paragraph of the comment in the form of a string}.",
+            "example": {
+                "username": "mallionaire",
+                "body": "This is a new comment."
+            }
         },
         "exampleResponse": {
-          "comment_id": 7,
-          "author": "mallionaire",
-          "review_id": 2,
-          "votes": 0,
-          "created_at": "2021-12-02T15:56:21.326Z",
-          "body": "This is a new comment."
+            "comment_id": 7,
+            "author": "mallionaire",
+            "review_id": 2,
+            "votes": 0,
+            "created_at": "2021-12-02T15:56:21.326Z",
+            "body": "This is a new comment."
         }
-      },
+    },
     "GET /api/users": {
         "description": "serves up a an array of user objects",
         "queries": [],
@@ -124,9 +127,72 @@
             ]
         }
     },
-    "DELETE /api/comments/:comment:id": {
+    "DELETE /api/comments/:comment_id": {
         "description": "serves up an empty object when user requests a certain comment deleted",
         "queries": [],
         "exampleResponse": {}
+    },
+    "GET /api/users/:username": {
+        "description": "serves a single user by username",
+        "queries": [],
+        "exampleResponse": {
+            "users": [
+                {
+                    "username": "mallionaire",
+                    "name": "haz",
+                    "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+                }
+            ]
+        }
+    },
+    "POST /api/reviews": {
+        "description": "serves up a new object which consists of the posted review",
+        "queries": [],
+        "Request Body Guide": {
+            "format": "an object containing the correct body information.",
+            "example": {
+                "title": "Suits",
+                "designer": "Taaha Khalifa",
+                "owner": "mallionaire",
+                "review_body": "Let's get it cracking!",
+                "category": "euro game"
+            }
+        },
+        "exampleResponse": {
+            "review_id": 14,
+            "title": "Suits",
+            "designer": "Taaha Khalifa",
+            "owner": "mallionaire",
+            "review_body": "Let's get it cracking!",
+            "category": "euro game",
+            "review_img_url": "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?w=700&h=700",
+            "created_at": "2023-01-23T00:24:54.948Z",
+            "votes": 0,
+            "comment_count": "0"
+        }
+    },
+    "DELETE /api/reviews/:review_id": {
+        "description": "serves up an empty object when user requests a certain review deleted",
+        "queries": [],
+        "exampleResponse": {}
+    },
+    "PATCH /api/comments/:comment_id": {
+        "description": "updates the votes of the given comment by comment_id",
+        "queries": [],
+        "Request Body Guide": {
+            "format": "an object containing the correct body information - { inc_votes: a number to either increment (e.g 2) by or decrement (e.g -2) by }.",
+            "example": { "inc_votes": 46 }
+        },
+        "exampleResponse": {
+            "comment": [
+                {
+                    "body": "I loved this game too!",
+                    "votes": 62,
+                    "author": "bainesface",
+                    "review_id": 2,
+                    "created_at": "2017-11-22T12:43:33.389Z"
+                }
+            ]
+        }
     }
 }
