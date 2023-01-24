@@ -289,10 +289,8 @@ describe("/api/users", () => {
 
 describe("/api/reviews", () => {
     test("GET: 200 - should handle a category query, which selects the reviews by the category value specified in the query.", () => {
-        const query1 = "category";
-        const query2 = "dexterity";
         return request(app)
-            .get(`/api/reviews?${query1}=${query2}`)
+            .get(`/api/reviews?category=dexterity`)
             .expect(200)
             .then(({ body: { reviews } }) => {
                 expect(reviews.length).toBe(1);
@@ -634,14 +632,14 @@ describe("/api/reviews", () => {
                 expect(reviews.length).toBe(5);
             });
     });
-    // test("GET: 200 - should return article count", () => {
-    //     return request(app)
-    //         .get("/api/reviews?limit=5&p=2")
-    //         .expect(200)
-    //         .then(({ body: { reviews } }) => {
-    //             expect(reviews.total_count).toEqual();
-    //         });
-    // });
+    test("GET: 200 - should return review count", () => {
+        return request(app)
+            .get("/api/reviews?limit=5&p=2")
+            .expect(200)
+            .then(({ body: reviews }) => {
+                expect(reviews.total_count).toEqual(13);
+            });
+    });
     test("GET: 400 - respond with msg Bad Request when limit query is invalid", () => {
         return request(app)
             .get("/api/reviews?limit=ten&p=1")
