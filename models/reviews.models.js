@@ -57,7 +57,6 @@ ON reviews.review_id = comments.review_id
         const offsetNum = p * 10 - 10;
         pushedQuery.push(offsetNum);
     }
-
     const checkMatch = fetchAllCategories()
         .then((categoriesArray) => {
             return categoriesArray.some(({ slug }) => slug === category);
@@ -68,15 +67,23 @@ ON reviews.review_id = comments.review_id
             }
         });
 
+    const dbQueryReviewCount = db
+        .query(`SELECT * FROM REVIEWS;`)
+        .then(({ rows: reviews }) => {
+            return reviews.length;
+        });
+
     const dbQuery = db
         .query(sqlString, pushedQuery)
         .then(({ rows: reviews }) => {
             return reviews;
         });
 
-    return Promise.all([checkMatch, dbQuery]).then(([checkMatch, dbQuery]) => {
-        return dbQuery;
-    });
+    return Promise.all([checkMatch, dbQueryReviewCount, dbQuery]).then(
+        ([checkMatch, dbQueryReviewCount, dbQuery]) => {
+            return { reviews: dbQuery, total_count: dbQueryReviewCount };
+        }
+    );
 }
 
 function fetchReviewObject(id) {
@@ -189,9 +196,16 @@ function insertReview({ title, designer, owner, review_body, category }) {
     return Promise.all([
         reviewWithoutCommentCount,
         reviewWithCommentCount,
-    ]).then(([reviewWithoutCommentCount, reviewWithCommentCount]) => {
-        return reviewWithCommentCount.rows[0];
-    });
+    ]).then(
+        ([
+            reviewWithoutCommentCount,
+            {
+                rows: [review],
+            },
+        ]) => {
+            return review;
+        }
+    );
 }
 
 function removeReview(id) {

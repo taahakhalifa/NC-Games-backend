@@ -15,7 +15,7 @@ function getReviews(req, res, next) {
     fetchAllReviews(category, sort_by, order, limit, p)
         .then((reviews) => {
             Number(reviews.comment_count);
-            res.status(200).send({ reviews });
+            res.status(200).send(reviews);
         })
         .catch((err) => {
             next(err);
