@@ -58,13 +58,13 @@ npm install
 
 Now that you have completed the inital setup, you will need to `create the two environment variable files`. To do this, complete the following steps precisely.
 
-1. Create a file called ".env.test" (excluding the quotations) and ONLY copy the following text to it:
+1. Create a file called ".env.test" and copy the following text to it:
 
 ```bash
 PGDATABASE=nc_games_test;
 ```
 
-2. Create another file called ".env.development" (excluding the quotations) and ONLY copy the following text to it:
+2. Create another file called ".env.development" and copy the following text to it:
 
 ```bash
 PGDATABASE=nc_games;
@@ -96,4 +96,4 @@ npm test
 
 ---
 
-If every test has passed, congratulations! You have succesfully completed the setup.
+If every test has passed, congratulations! You have succesfully installed this repository to your local machine.
