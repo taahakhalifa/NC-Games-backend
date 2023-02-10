@@ -91,11 +91,11 @@ describe("/api/reviews/:review_id", () => {
                 expect(review).toHaveProperty("designer", expect.any(String));
                 expect(review).toHaveProperty(
                     "comment_count",
-                    expect.any(String)
+                    expect.any(Number)
                 );
 
                 expect(review).toEqual({
-                    comment_count: "0",
+                    comment_count: 0,
                     review_id: 1,
                     title: "Agricola",
                     designer: "Uwe Rosenberg",
@@ -173,10 +173,12 @@ describe("/api/reviews/:review_id/comments", () => {
                 body: "10 reasons why cats are better than dogs",
             })
             .expect(({ body: { comment } }) => {
-                expect(comment).toEqual({
-                    username: "philippaclaire9",
-                    body: "10 reasons why cats are better than dogs",
-                });
+                expect(comment).toHaveProperty("comment_id");
+                expect(comment).toHaveProperty("votes");
+                expect(comment).toHaveProperty("created_at");
+                expect(comment).toHaveProperty("author");
+                expect(comment).toHaveProperty("body");
+                expect(comment).toHaveProperty("review_id");
             });
     });
     test("POST: 400 - should respond with msg Bad Request when endpoint is not a number", () => {

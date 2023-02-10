@@ -1,6 +1,4 @@
-const { off } = require("../app");
 const db = require("../db/connection");
-const reviews = require("../db/data/test-data/reviews");
 const { fetchAllCategories } = require("./categories.models");
 
 function fetchAllReviews(
@@ -24,7 +22,7 @@ function fetchAllReviews(
     const validOrderArg = ["asc", "desc"];
     const pushedQuery = [];
     let sqlString = `
-SELECT reviews.owner, reviews.title, reviews.review_id, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, reviews.designer, count(comments.review_id) AS comment_count
+SELECT reviews.owner, reviews.title, reviews.review_id, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, reviews.designer, CAST(COUNT(comments.review_id) AS INT) AS comment_count
 FROM reviews
 LEFT JOIN comments
 ON reviews.review_id = comments.review_id
@@ -33,6 +31,7 @@ ON reviews.review_id = comments.review_id
     if (!validSortArg.includes(sort) || !validOrderArg.includes(order)) {
         return Promise.reject({ status: 400, msg: "Bad Request" });
     }
+
     if (category) {
         sqlString += `\n WHERE reviews.category = $1 \n GROUP BY reviews.review_id
         `;
@@ -57,6 +56,7 @@ ON reviews.review_id = comments.review_id
         const offsetNum = p * 10 - 10;
         pushedQuery.push(offsetNum);
     }
+
     const checkMatch = fetchAllCategories()
         .then((categoriesArray) => {
             return categoriesArray.some(({ slug }) => slug === category);
@@ -88,12 +88,13 @@ ON reviews.review_id = comments.review_id
 
 function fetchReviewObject(id) {
     const sqlString = `
-    SELECT reviews.*, COUNT(comments.review_id) AS comment_count
-    FROM reviews
-    LEFT JOIN comments
-    ON reviews.review_id = comments.review_id
-    WHERE reviews.review_id = $1
-    GROUP BY reviews.review_id
+    SELECT reviews.*, CAST(COUNT(comments.review_id) AS INT) AS comment_count
+FROM reviews
+LEFT JOIN comments
+ON reviews.review_id = comments.review_id
+WHERE reviews.review_id = $1
+GROUP BY reviews.review_id
+
   `;
 
     return db.query(sqlString, [id]).then(({ rows: [review] }) => {
@@ -144,7 +145,7 @@ function insertComment({ username, body }, id) {
   INSERT INTO comments
   (author, body, review_id)
   VALUES ($1, $2, $3)
-  RETURNING author AS username, body;
+  RETURNING *;
   `;
     const commentValues = [username, body, id];
 
