@@ -50,7 +50,6 @@ function postComment(req, res, next) {
     const { review_id } = req.params;
     insertComment(newComment, review_id)
         .then((comment) => {
-            console.log(comment);
             res.status(201).send({ comment });
         })
         .catch((err) => {

@@ -114,6 +114,7 @@ function fetchComments(id, limit, p) {
     SELECT *
     FROM comments
     WHERE comments.review_id = $1
+    ORDER BY comments.created_at
     `;
 
     const pushedQuery = [id];
