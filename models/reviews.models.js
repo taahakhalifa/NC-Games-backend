@@ -36,6 +36,8 @@ ON reviews.review_id = comments.review_id
         sqlString += `\n WHERE reviews.category = $1 \n GROUP BY reviews.review_id \n ORDER BY reviews.${sort} ${order}
         `;
         pushedQuery.push(category);
+    } else if (sort === "comment_count") {
+        sqlString += `\n GROUP BY reviews.review_id \n ORDER BY comments.${sort} ${order}`;
     } else {
         sqlString += `\n GROUP BY reviews.review_id \n ORDER BY reviews.${sort} ${order}`;
     }
